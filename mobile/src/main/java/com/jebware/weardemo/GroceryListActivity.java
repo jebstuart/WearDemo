@@ -1,9 +1,16 @@
 package com.jebware.weardemo;
 
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -105,6 +112,45 @@ public class GroceryListActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.grocery_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_refresh) {
+            refreshList();
+            return true;
+        } else if (item.getItemId() == R.id.action_notify) {
+            postNotification();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void postNotification() {
+        PendingIntent openListPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, GroceryListActivity.class), 0);
+
+        NotificationCompat.Action action = new NotificationCompat.Action.Builder(
+                R.drawable.ic_action_reload, "Reload", openListPendingIntent)
+                .build();
+
+        Notification notif = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("WearDemo")
+                .setContentText("List Updated")
+                .setContentIntent(openListPendingIntent)
+                .setAutoCancel(true)
+                .extend(new android.support.v4.app.NotificationCompat.WearableExtender().addAction(action))
+                .build();
+
+        NotificationManagerCompat mgr = NotificationManagerCompat.from(this);
+        mgr.notify(NOTIFICATION_ID, notif);
     }
 
     private DataApi.DataListener dataListener = new DataApi.DataListener() {
