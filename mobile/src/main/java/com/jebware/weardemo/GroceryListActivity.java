@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEventBuffer;
@@ -28,8 +29,9 @@ import butterknife.OnClick;
 
 public class GroceryListActivity extends AppCompatActivity {
 
+    private static final int NOTIFICATION_ID = 10101;
+
     //TODO comments
-    //TODO menu option to clear everything in the data
 
     @InjectView(android.R.id.text1)
     EditText inputField;
@@ -67,7 +69,9 @@ public class GroceryListActivity extends AppCompatActivity {
         PutDataMapRequest request = PutDataMapRequest.create(path);
         request.getDataMap().putInt("id", grocery.id);
         request.getDataMap().putString("value", grocery.value);
-        Wearable.DataApi.putDataItem(googleApiClient, request.asPutDataRequest()).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+        PendingResult<DataApi.DataItemResult> result =
+                Wearable.DataApi.putDataItem(googleApiClient, request.asPutDataRequest());
+        result.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
             @Override
             public void onResult(DataApi.DataItemResult dataItemResult) {
                 refreshList();
@@ -76,7 +80,10 @@ public class GroceryListActivity extends AppCompatActivity {
     }
 
     private void deleteItem(DataItem dataItem) {
-        Wearable.DataApi.deleteDataItems(googleApiClient, dataItem.getUri()).setResultCallback(new ResultCallback<DataApi.DeleteDataItemsResult>() {
+        PendingResult<DataApi.DeleteDataItemsResult> result =
+                Wearable.DataApi.deleteDataItems(googleApiClient, dataItem.getUri());
+
+        result.setResultCallback(new ResultCallback<DataApi.DeleteDataItemsResult>() {
             @Override
             public void onResult(DataApi.DeleteDataItemsResult deleteDataItemsResult) {
                 refreshList();
